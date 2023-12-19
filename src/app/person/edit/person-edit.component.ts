@@ -1,8 +1,8 @@
-import {Component} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {PersonService} from '../person.service';
-import {Person} from '../person';
+import { Component } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Person } from '../person';
+import { PersonService } from '../person.service';
 
 @Component({
     selector: 'app-person-edit',
@@ -21,19 +21,30 @@ export class PersonEditComponent {
     }
 
     getPerson(): void {
-        const idParam = this.route.snapshot.paramMap.get('id');
+        let idParam = this.route.snapshot.paramMap.get('id')?? "new";
         if (idParam === "new") {
             this.person = new Person();
         } else {
-            const id = parseInt(idParam as string, 10);
-            this.personService.findById(id).subscribe(person => this.person = person);
+            this.personService.findById(idParam).subscribe(person => this.person = person);
         }
     }
 
     save(): void {
-        this.personService.save(this.person).subscribe(() => {
+        if (this.person.id) {
+            this.update();
+        } else {
+            this.personService.save(this.person).subscribe(() => {
+                let snackBar = this.snackBar.open("Person saved", "OK",);
+                snackBar.onAction().subscribe(value => this.router.navigateByUrl("/persons"));
+            });
+        }
+    }
+
+    update(): void {
+        this.personService.update(this.person).subscribe(() => {
             let snackBar = this.snackBar.open("Person saved", "OK",);
             snackBar.onAction().subscribe(value => this.router.navigateByUrl("/persons"));
         });
     }
+
 }
